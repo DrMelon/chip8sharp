@@ -8,7 +8,7 @@ public class Chip8
     public const byte DISPLAY_WIDTH = 64;
     public const byte DISPLAY_HEIGHT = 32;
     public const uint REGISTER_COUNT = 16;
-    public const UInt16 FONT_START_ADDRESS = 0x000;
+    public const UInt16 FONT_START_ADDRESS = 0x050;
     public const UInt16 PC_START_ADDRESS = 0x200;
     
     public byte[] RAM = new byte[RAM_SIZE];
