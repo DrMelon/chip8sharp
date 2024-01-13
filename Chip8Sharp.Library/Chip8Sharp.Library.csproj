@@ -11,6 +11,8 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://github.com/DrMelon/Chip8Sharp.git</RepositoryUrl>
     </PropertyGroup>
 
     <ItemGroup>
