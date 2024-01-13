@@ -1,5 +1,6 @@
 # Chip8Sharp
 A [CHIP-8](https://en.wikipedia.org/wiki/CHIP-8) interpreter/emulator library for C#, built with dotnet 8.0. No dependencies!
+Also available on NuGet: [https://www.nuget.org/packages/Chip8Sharp/1.0.0](https://www.nuget.org/packages/Chip8Sharp/1.0.0)
 
 ## Getting Started
 Include Chip8Sharp.Library in your project with whichever means are most familiar to you. 
