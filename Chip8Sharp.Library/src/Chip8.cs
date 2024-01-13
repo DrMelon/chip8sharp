@@ -4,26 +4,89 @@ using System.Collections.Generic;
 
 public class Chip8
 {
+    /// <summary>
+    /// Maximum bytes of RAM the CHIP-8 has.
+    /// </summary>
     public const uint RAM_SIZE = 4096;
+    
+    /// <summary>
+    /// Display width, in pixels.
+    /// </summary>
     public const byte DISPLAY_WIDTH = 64;
+    
+    /// <summary>
+    /// Display height, in pixels.
+    /// </summary>
     public const byte DISPLAY_HEIGHT = 32;
+    
+    /// <summary>
+    /// Number of registers of the CHIP-8. 0x00 - 0x0F.
+    /// </summary>
     public const uint REGISTER_COUNT = 16;
+    
+    /// <summary>
+    /// Location of Font data in CHIP-8. 
+    /// </summary>
     public const UInt16 FONT_START_ADDRESS = 0x050;
+    
+    /// <summary>
+    /// Location of Program Data in CHIP-8.
+    /// </summary>
     public const UInt16 PC_START_ADDRESS = 0x200;
     
+    /// <summary>
+    /// CHIP-8's RAM.
+    /// </summary>
     public byte[] RAM = new byte[RAM_SIZE];
+    
+    /// <summary>
+    /// CHIP-8's Display - read this to provide graphical display. Monochrome.
+    /// </summary>
     public bool[] Display = new bool[DISPLAY_WIDTH * DISPLAY_HEIGHT];
+    
+    /// <summary>
+    /// CHIP-8's program counter.
+    /// </summary>
     public UInt16 PC = PC_START_ADDRESS;
+    
+    /// <summary>
+    /// CHIP-8's memory index register, often called I. 
+    /// </summary>
     public UInt16 Index;
+    
+    /// <summary>
+    /// CHIP-8's working stack.
+    /// </summary>
     public Stack<UInt16> Stack = new();
+    
+    /// <summary>
+    /// CHIP-8's delay timer - this is used to provide a simple timing clock and is updated at 60Hz by <see cref="UpdateDelayClocks"/>.
+    /// </summary>
     public byte DelayTimer;
+    
+    /// <summary>
+    /// CHIP-8's sound timer - when this is above zero, produce a beeping tone. It is updated at 60Hz by <see cref="UpdateDelayClocks"/>.
+    /// </summary>
     public byte SoundTimer;
+    
+    /// <summary>
+    /// CHIP-8's registers.
+    /// </summary>
     public byte[] Registers = new byte[REGISTER_COUNT];
     
-    public UInt16 KeyboardState; // Each bit represents on/off of one of the 16 keys of the CHIP-8.
+    /// <summary>
+    /// CHIP-8's 16-key keyboard state. Each bit represents on/off of one of the 16 keys of the CHIP-8. See <see cref="SetKeyState"/> for an easier API.
+    /// </summary>
+    public UInt16 KeyboardState; 
 
-    public bool SuperChipQuirks = false; // Changes 0x8XY6 and 0x8XYE to act like SUPER-CHIP and CHIP-48.
+    /// <summary>
+    /// Setting this to true will change some of the instructions to behave like the CHIP-48 and SUPER-CHIP. Some ROMs may require this.
+    /// </summary>
+    public bool SuperChipQuirks = false; 
 
+    /// <summary>
+    /// Read-only CHIP-8 font data. 
+    /// </summary>
     public readonly byte[] Font = new byte[]
     {
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -44,7 +107,11 @@ public class Chip8
         0xF0, 0x80, 0xF0, 0x80, 0x80 // F
     };
 
-    public static Chip8 Create()
+    /// <summary>
+    /// Creates a CHIP-8 instance with its font data preloaded at <see cref="FONT_START_ADDRESS"/>.
+    /// </summary>
+    /// <returns>CHIP-8 instance</returns>
+    public static Chip8 CreateWithFont()
     {
         var chip8 = new Chip8();
         chip8.Font.CopyTo(chip8.RAM, FONT_START_ADDRESS);
@@ -53,7 +120,7 @@ public class Chip8
     }
 
     /// <summary>
-    /// Perform a single step of the fetch, decode, execute cycle.
+    /// Perform a single step of the fetch, decode, execute cycle. Should be run at roughly 500Hz.
     /// </summary>
     public void Step()
     {
@@ -273,6 +340,11 @@ public class Chip8
         }
     }
 
+    /// <summary>
+    /// Set a key of the CHIP-8's 16-key keyboard to the pressed or unpressed state.
+    /// </summary>
+    /// <param name="key">Which key to press, 0x0 - 0xF</param>
+    /// <param name="state">Whether the key is currently pressed or not</param>
     public void SetKeyState(byte key, bool state)
     {
         if (state)
@@ -281,11 +353,19 @@ public class Chip8
             KeyboardState = (UInt16)(KeyboardState & ~(1 << key));
     }
 
+    /// <summary>
+    /// Query the key state of a given CHIP-8 key.
+    /// </summary>
+    /// <param name="key">Which key to chech, 0x0 - 0xF</param>
+    /// <returns>Whether the key is currently pressed or not</returns>
     public bool IsKeyDown(byte key)
     {
         return (KeyboardState & (1 << key)) == 1;
     }
-
+    
+    /// <summary>
+    /// Draws a sprite using the CHIP-8's special sprite drawing logic.
+    /// </summary>
     private void DrawSprite(byte drawX, byte drawY, byte spriteHeight)
     {
         Registers[0x0F] = 0; // VF set to 0.
@@ -334,6 +414,10 @@ public class Chip8
             SoundTimer--;
     }
 
+    /// <summary>
+    /// Copy the internal state from one CHIP-8 instance into the current instance. For save-state support. 
+    /// </summary>
+    /// <param name="from"></param>
     public void CopyStateFrom(Chip8 from)
     {
         Index = from.Index;
@@ -348,6 +432,9 @@ public class Chip8
         from.Registers.CopyTo(Registers, 0);
     }
 
+    /// <summary>
+    /// Clears the display of the CHIP-8. Equivalent to instruction 0x00E0.
+    /// </summary>
     public void ClearDisplay()
     {
         for (int i = 0; i < DISPLAY_WIDTH * DISPLAY_HEIGHT; i++)
